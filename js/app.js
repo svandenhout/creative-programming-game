@@ -23,7 +23,8 @@ require([
   Physics.behavior("driving", function(parent) {
 
     var drive = 0, // velocity
-        turn = 0;
+        turn = 0,
+        accelerate = 0;
 
     return {
       init: function(options) {
@@ -34,10 +35,10 @@ require([
         document.addEventListener("keydown", function(e){
           switch (e.keyCode){
             case 38: // up
-              car.accelerate(1);
+              accelerate = 1;
             break;
             case 40: // down
-              car.accelerate(-1);
+              accelerate = -1;
             break;
             case 37: // left
               car.turn(-1);
@@ -51,10 +52,10 @@ require([
         document.addEventListener("keyup", function(e){
           switch (e.keyCode){
             case 38: // up
-              // car.stop();
+              accelerate = 0;
             break;
             case 40: // down
-              // car.stop();
+              accelerate = 0;
             break;
             case 37: // left
               car.turn(0);
@@ -69,7 +70,7 @@ require([
         });
       },
       behave: function(data) {
-         car.drive();
+        car.drive(accelerate);
       }
     };
   });
@@ -90,24 +91,18 @@ require([
         this.view = carImg;
       },
       turn: function(amount) {
-        //this.state.angular.pos += amount * deg;
-
-        // this.state.angular.pos = amount * 0.2 * deg;
-        // console.log(amount * 0.2 * deg);
-        this.state.angular.vel = amount * 0.2 * (Math.PI / 180);
+        this.state.angular.vel = amount * 0.3 * (Math.PI / 180);
 
         return this;
       },
-      accelerate: function(amount) {
-        if(amount > 0 && a < 0.3) a += amount * 0.08;
-        if(amount > 0 && a < 0.8) a += amount * 0.06;
-        if(amount < 0 && a > -0.4) a += amount * 0.04;
-        console.log(a);
-      },
-      drive: function() {
+      drive: function(amount) {
         var self = this,
             world = this._world;
         if(!world) return self;
+
+        // if(amount > 0 && a < 0.3) a += amount * 0.08;
+        if(amount > 0 && a < 1) a += amount * 0.06;
+        if(amount < 0 && a > -0.4) a += amount * 0.04;
 
         v.set(
           a * Math.cos(this.state.angular.pos),
