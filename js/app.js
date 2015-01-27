@@ -11,7 +11,10 @@ require([
   "physicsjs",
   "physicsjs/bodies/rectangle",
   "physicsjs/bodies/convex-polygon",
-  "physicsjs/renderers/canvas"
+  "physicsjs/renderers/canvas",
+  "physicsjs/behaviors/sweep-prune", 
+  "physicsjs/behaviors/body-collision-detection",
+  "physicsjs/behaviors/body-impulse-response"
 ], function(Physics) {
   "use strict";
 
@@ -24,12 +27,12 @@ require([
 
     var drive = 0, // velocity
         turn = 0,
-        accelerate = 0;
+        accelerate = 0,
+        _car = {};
 
     return {
       init: function(options) {
         var self = this;
-
         parent.init.call(this, options);
 
         document.addEventListener("keydown", function(e){
@@ -41,10 +44,10 @@ require([
               accelerate = -1;
             break;
             case 37: // left
-              car.turn(-1);
+              turn = -1;
             break;
             case 39: // right
-              car.turn(1);
+              turn = 1;
             break;
           }
           return false;
@@ -58,19 +61,19 @@ require([
               accelerate = 0;
             break;
             case 37: // left
-              car.turn(0);
-              // car.stop();
+              turn = 0;
             break;
             case 39: // right
-              car.turn(0);
-              // car.stop();
+              turn = 0;
             break;
           }
           return false;
         });
       },
       behave: function(data) {
-        car.drive(accelerate);
+        _car = this.getTargets()[0];
+        _car.drive(accelerate);
+        _car.turn(turn);
       }
     };
   });
@@ -100,7 +103,6 @@ require([
             world = this._world;
         if(!world) return self;
 
-        // if(amount > 0 && a < 0.3) a += amount * 0.08;
         if(amount > 0 && a < 1) a += amount * 0.06;
         if(amount < 0 && a > -0.4) a += amount * 0.04;
 
@@ -108,17 +110,14 @@ require([
           a * Math.cos(this.state.angular.pos),
           a * Math.sin(this.state.angular.pos)
         );
-        // console.log(a * Math.sin(angle));
 
         this.state.vel = v;
 
         return self;
       },
-
     };
-
   });
-  /* costum body */
+  /* costum bodies */
 
   // subscribe to the ticker
   Physics.util.ticker.on(function(time) {
@@ -136,6 +135,7 @@ require([
     world.render();
   });
 
+
   var car = Physics.body("car", {
     x: 150, // x-coordinate
     y: 100, // y-coordinate
@@ -143,7 +143,43 @@ require([
     height: 64
   });
 
-  var driving = Physics.behavior("driving").applyTo(car);
+  var environment = Physics.body("convex-polygon", {
+    x: 0,
+    y: 0,
+    vertices: [
+      {x: 0, y: 0},
+      {x: 0, y: 200},
+      {x: 200, y: 500},
+      {x: 20, y: 0}
+    ]
+  });
 
-  world.add([car, driving]);
+  var wall = Physics.body("rectangle", {
+    x: 350, // x-coordinate
+    y: 100, // y-coordinate
+    width: 50,
+    height: 500
+  });
+
+  var driving = Physics.behavior("driving").applyTo([car]);
+
+  world.add([
+    car, environment, wall, driving, 
+    Physics.behavior('sweep-prune'),
+    Physics.behavior('body-collision-detection'),
+    Physics.behavior('body-impulse-response')
+  ]);
+
+  world.on("collisions:detected", function(data) {
+    console.log(data);
+    // var c;
+    // for (var i = 0, l = data.collisions.length; i < l; i++){
+    //   c = data.collisions[ i ];
+    //   world.publish({
+    //     topic: "collision-pair",
+    //     bodyA: c.bodyA,
+    //     bodyB: c.bodyB
+    //   });
+    // }
+  });
 });
