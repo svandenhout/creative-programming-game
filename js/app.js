@@ -11,6 +11,8 @@ require([
   "physicsjs",
   "physicsjs/bodies/convex-polygon",
   "physicsjs/renderers/canvas",
+  "physicsjs/bodies/rectangle",
+  "physicsjs/bodies/circle",
   "physicsjs/behaviors/sweep-prune",
   "physicsjs/behaviors/body-collision-detection",
   "physicsjs/behaviors/body-impulse-response",
@@ -19,6 +21,28 @@ require([
   "js/car"
 ], function(Physics) {
   "use strict";
+
+  var buildEnvironment = function() {
+    var objectTypes = ["circle", "rectangle"],
+        margin = 150,
+        topMargin = 0,
+        environment = [];
+
+    // elements required for level
+    for(var i = 0; i < 40; i++) {
+      if(i > 0 && i % 5 == 0) topMargin += margin;
+      environment.push(
+        Physics.body(objectTypes[1], {
+          // place the center of the square at (0, 0)
+          x: i *150,
+          y: 15,
+          width: 75,
+          height: 75
+        })
+      );
+    }
+  };
+
   var scratch = Physics.scratchpad(),
       carV = scratch.vector(),
       finishImg = new Image();
@@ -65,31 +89,6 @@ require([
   });
 
   finish.view = finishImg;
-
-  // elements required for level
-  var environment = [
-    Physics.body('convex-polygon', {
-      // place the center of the square at (0, 0)
-      x: 15,
-      y: 15,
-      vertices: [
-        {x: 0, y: 0 },
-        {x: 0, y: 20 },
-        {x: 20, y: 20 },
-        {x: 20, y: 0 }
-      ]
-    }),
-    Physics.body("convex-polygon", {
-      treatment: "static",
-      x: 50,
-      y: 512,
-      vertices: [
-        {x: 0, y: 0},
-        {x: 0, y: 768},
-        {x: 200, y: 384},
-      ]
-    })
-  ]
 
   var wall = Physics.body("rectangle", {
     treatment: "static",
