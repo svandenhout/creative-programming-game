@@ -15,7 +15,7 @@ define(["physicsjs", "physicsjs/bodies/rectangle"], function(Physics) {
         scratch = Physics.scratchpad(),
         v = scratch.vector(),
         a = 0,
-        gun;
+        gunMount;
 
     carImg.src = require.toUrl("images/car.png");
 
@@ -53,6 +53,8 @@ define(["physicsjs", "physicsjs/bodies/rectangle"], function(Physics) {
         laser.treatment = "kinematic";
         laser.label = "laser";
         
+        gunMount.state.angular.pos = a;
+        
         // remove the laser pulse in 600ms
         setTimeout(function(){
             world.removeBody(laser);
@@ -61,9 +63,8 @@ define(["physicsjs", "physicsjs/bodies/rectangle"], function(Physics) {
         world.add(laser);
         return self;
       },
-      drawGun: function() {
-        var cos = Math.cos(a);
-        var sin = Math.sin(a);
+      mount: function(gun) {
+        gunMount = gun;
       },
       drive: function(speed) {
         var self = this,
@@ -74,21 +75,12 @@ define(["physicsjs", "physicsjs/bodies/rectangle"], function(Physics) {
           speed * Math.cos(this.state.angular.pos),
           speed * Math.sin(this.state.angular.pos)
         );
-
         this.state.vel = v;
-        world.removeBody(gun);
 
-        gun = Physics.body("rectangle", {
-          width: 5,
-          height: 150,
-          label: "gun",
-          offset: Physics.vector(0, -75),
-          x: this.state.pos.get(0),
-          y: this.state.pos.get(1)
-        });
+        // make th gun stick to the car
+        gunMount.state.pos.x = this.state.pos.get(0);
+        gunMount.state.pos.y = this.state.pos.get(1);
 
-        gun.state.angular.pos = a;
-        world.add(gun)
         return self;
       },
       crash: function() {

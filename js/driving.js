@@ -69,7 +69,7 @@ define(["physicsjs"], function(Physics) {
         return false;
       });
     },
-    behave: function(data) {
+    behave: function() {
       if(accelerate === 0 && velocity > 0) velocity -= deceleration;
       if(accelerate === 0 && velocity < 0) velocity += deceleration;
       if(accelerate === 1 && velocity < 1) velocity += forwardsAcc;
