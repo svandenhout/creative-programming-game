@@ -22,8 +22,11 @@ require([
 ], function(Physics) {
   "use strict";
 
+  var scratch = Physics.scratchpad(),
+      carV = scratch.vector(),
+      gunImg = new Image();
 
-  var finishImg = new Image();
+  gunImg.src = require.toUrl("images/gun.png");
 
   var world = Physics({
     timestep: 1000 / 60
@@ -38,7 +41,6 @@ require([
 
   var renderer = Physics.renderer("canvas", {
     el: "canvas",
-
     autoResize: false,
     width: 1280,
     height: 768
@@ -48,27 +50,24 @@ require([
     world.render();
   });
 
-
   var car = Physics.body("car", {
     label: "car",
+    treatment: "kinematic",
     x: 150,
     y: 100,
     width: 128,
     height: 64
   });
 
-
-  finishImg.src = require.toUrl("images/finish.jpg");
-  var finish = Physics.body("rectangle", {
-    treatment: "kinematic",
-    label: "finish",
-    x: 1100,
-    y: 0,
+  var gun = Physics.body("rectangle", {
+    treatment: "static",
+    x: 150,
+    y: 100,
+    height: 23,
     width: 100,
-    height: 50
+    view: gunImg,
+    offset: Physics.vector(50, 0)
   });
-
-  finish.view = finishImg;
 
   var wall = Physics.body("rectangle", {
     treatment: "static",
@@ -82,7 +81,7 @@ require([
   var driving = Physics.behavior("driving").applyTo([car]);
 
   world.add([
-    renderer, car, wall, finish, driving,
+    renderer, car, wall, driving, gun,
     Physics.behavior("sweep-prune"),
     Physics.behavior("body-collision-detection"),
     Physics.behavior("body-impulse-response"),
@@ -90,4 +89,6 @@ require([
       aabb: bounds
     })
   ]);
+
+  car.mount(gun);
 });

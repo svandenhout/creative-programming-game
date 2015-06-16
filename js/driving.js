@@ -70,7 +70,7 @@ define(["physicsjs"], function(Physics) {
         return false;
       });
     },
-    behave: function(data) {
+    behave: function() {
       if(accelerate === 0 && velocity > 0) velocity -= deceleration;
       if(accelerate === 0 && velocity < 0) velocity += deceleration;
       if(accelerate === 1 && velocity < 1) velocity += forwardsAcc;
@@ -82,27 +82,25 @@ define(["physicsjs"], function(Physics) {
     connect: function(world) {
       var query = Physics.query({
         $or: [
-          {bodyA: {label: "bullet" }}, 
-          {bodyB: {label: "bullet" }}
+          {bodyA: {label: "laser" }}, 
+          {bodyB: {label: "laser" }}
         ]
       });
       // called when the car has a collision
       // (collision listener)
       world.on("collisions:detected", function(data) {
-        var shot = Physics.util.find(data.collisions, query);
+        var laser = Physics.util.find(data.collisions, query);
         // car hits the finish
-        if(shot) {
-          console.log("hit")
+        if(laser) {
           // var currentTime = new Date();
           // var time = currentTime.getTime() - startTime.getTime();
           // console.log(time);
           // world.pause();
         }else {
-          console.log("hit");
           velocity = -velocity * 0.6;
         }
       }, this);
-      world.on('integrate:positions', this.behave, this);
+      world.on("integrate:positions", this.behave, this);
     }
   };
 
