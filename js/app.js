@@ -22,27 +22,6 @@ require([
 ], function(Physics) {
   "use strict";
 
-  var buildEnvironment = function() {
-    var objectTypes = ["circle", "rectangle"],
-        margin = 150,
-        topMargin = 0,
-        environment = [];
-
-    // elements required for level
-    for(var i = 0; i < 40; i++) {
-      if(i > 0 && i % 5 == 0) topMargin += margin;
-      environment.push(
-        Physics.body(objectTypes[1], {
-          // place the center of the square at (0, 0)
-          x: i *150,
-          y: 15,
-          width: 75,
-          height: 75
-        })
-      );
-    }
-  };
-
   var scratch = Physics.scratchpad(),
       carV = scratch.vector(),
       finishImg = new Image();
@@ -111,5 +90,5 @@ require([
     })
   ]);
 
-  world.add(environment);
+  // world.add(environment);
 });

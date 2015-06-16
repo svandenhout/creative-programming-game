@@ -46,6 +46,8 @@ define(["physicsjs"], function(Physics) {
             turn = maxTurnSpeed - (velocity > -minTurnSpeed || velocity < 0.3) ? 
                 minTurnSpeed : velocity ;
           break;
+          case 32:
+            _car.shoot();
         }
         return false;
       });
@@ -79,20 +81,20 @@ define(["physicsjs"], function(Physics) {
     connect: function(world) {
       var query = Physics.query({
         $or: [
-          {bodyA: {label: "finish" }}, 
-          {bodyB: {label: "finish" }}
+          {bodyA: {label: "laser" }}, 
+          {bodyB: {label: "laser" }}
         ]
       });
       // called when the car has a collision
       // (collision listener)
       world.on("collisions:detected", function(data) {
-        var finish = Physics.util.find(data.collisions, query);
+        var laser = Physics.util.find(data.collisions, query);
         // car hits the finish
-        if(finish) {
-          var currentTime = new Date();
-          var time = currentTime.getTime() - startTime.getTime();
-          console.log(time);
-          world.pause();
+        if(laser) {
+          // var currentTime = new Date();
+          // var time = currentTime.getTime() - startTime.getTime();
+          // console.log(time);
+          // world.pause();
         }else {
           velocity = -velocity * 0.6;
         }
