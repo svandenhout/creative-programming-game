@@ -18,6 +18,7 @@ require([
   "physicsjs/behaviors/body-impulse-response",
   "physicsjs/behaviors/edge-collision-detection",
   "js/driving",
+  "js/explode",
   "js/car"
 ], function(Physics) {
   "use strict";
@@ -50,17 +51,19 @@ require([
     world.render();
   });
 
-  var car = Physics.body("car", {
-    label: "car",
-    treatment: "kinematic",
-    x: 150,
-    y: 100,
-    width: 128,
-    height: 64
+
+  var target = Physics.body("circle", {
+    x: 500,
+    y: 250,
+    label: "target",
+    treatment: "dynamic",
+    radius: 40
   });
 
   var gun = Physics.body("rectangle", {
-    treatment: "static",
+    label: "gun",
+    restitution: 0,
+    treatment: "kinematic",
     x: 150,
     y: 100,
     height: 23,
@@ -78,17 +81,43 @@ require([
     height: 500
   });
 
+  // spawn laser on upper right of the screen
+  var laser = Physics.body("circle", {
+    radius: 5,
+    treatment: "kinematic",
+    label: "laser",
+    hidden: true,
+    x: 1280,
+    y: 768,
+    vx: 0.4,
+    vy: 0.4
+  });
+
+  var car = Physics.body("car", {
+    label: "car",
+    treatment: "dynamic",
+    x: 150,
+    y: 100,
+    width: 128,
+    height: 64,
+    laser: laser,
+    gun: gun
+  });
+
   var driving = Physics.behavior("driving").applyTo([car]);
+  var explode = Physics.behavior("explode").applyTo([target]);
+
+  var objects = [car, wall, target, laser];
+  // Physics.behavior("edge-collision-detection").applyTo(objects);
 
   world.add([
-    renderer, car, wall, driving, gun,
-    Physics.behavior("sweep-prune"),
-    Physics.behavior("body-collision-detection"),
-    Physics.behavior("body-impulse-response"),
+    renderer, car, wall, driving, gun, laser, target, explode,
+    Physics.behavior("sweep-prune").applyTo(objects),
+    Physics.behavior("body-collision-detection").applyTo(objects),
+    Physics.behavior("body-impulse-response").applyTo(objects),
     Physics.behavior("edge-collision-detection", {
       aabb: bounds
     })
   ]);
 
-  car.mount(gun);
 });
