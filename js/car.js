@@ -25,6 +25,8 @@ define(["physicsjs", "physicsjs/bodies/rectangle"], function(Physics) {
       init: function(options) {
         gun = options.gun;
         laser = options.laser;
+        
+        // make the gun rotate
         gun.state.angular.vel = 0.005;
         parent.init.call(this, options);
         this.view = carImg;
