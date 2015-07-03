@@ -31,10 +31,10 @@ define(["physicsjs"], function(Physics) {
       world.on("collisions:detected", function(data) {
         var found = Physics.util.find(data.collisions, query);
         // the target is removed 
-        if(found) {
-          world.removeBody(this.getTargets()[0])
-        }else {
-
+        if(found && found.bodyA.label === "laser") {
+          world.removeBody(found.bodyB);
+        }else if(found && found.bodyB.label === "laser") {
+          world.removeBody(found.bodyA);
         }
       }, this);
       world.on("integrate:positions", this.behave, this);

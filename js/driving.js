@@ -39,14 +39,14 @@ define(["physicsjs"], function(Physics) {
               accelerate = -1;
             break;
             case 37: // left
-              turn = -maxTurnSpeed + (velocity > -minTurnSpeed || velocity < 0.3) ? 
+              turn = -maxTurnSpeed + (velocity > -minTurnSpeed || velocity < 0.3) ?
                   -minTurnSpeed : velocity ;
             break;
             case 39: // right
-              turn = maxTurnSpeed - (velocity > -minTurnSpeed || velocity < 0.3) ? 
+              turn = maxTurnSpeed - (velocity > -minTurnSpeed || velocity < 0.3) ?
                   minTurnSpeed : velocity ;
             break;
-            case 32: 
+            case 32:
               _car.shoot();
             break;
           }
@@ -78,6 +78,28 @@ define(["physicsjs"], function(Physics) {
         _car = this.getTargets()[0];
         _car.drive(velocity);
         _car.turn(turn);
+      },
+      connect: function(world) {
+
+        // query for collisions between laser and target
+        var query = Physics.query({
+          $or: [
+            {bodyA: {label: "car" }}, {bodyB: {label: "car"}}
+          ]
+        });
+        // called when a collision happens
+        world.on("collisions:detected", function(data) {
+          var found = Physics.util.find(data.collisions, query);
+          // the target is removed
+          if(found && found.bodyA.label === "car") {
+            velocity = - velocity * 0.6;
+          }else if(found && found.bodyB.label === "car") {
+            console.log("car");
+            velocity = - velocity * 0.6;
+          }
+        }, this);
+        world.on("integrate:positions", this.behave, this);
+        return self;
       }
     };
 

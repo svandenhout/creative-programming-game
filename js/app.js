@@ -25,7 +25,8 @@ require([
 
   var scratch = Physics.scratchpad(),
       carV = scratch.vector(),
-      gunImg = new Image();
+      gunImg = new Image(),
+      targets;
 
   gunImg.src = require.toUrl("images/gun.png");
 
@@ -47,17 +48,14 @@ require([
     height: 768
   });
 
-  world.on("step", function(){
+  world.on("step", function() {
     world.render();
   });
 
+  // the enemy will split in two and continue bouncing
+  // around the level, it also kills the player
+  var enemy = Physics.body("circle", {
 
-  var target = Physics.body("circle", {
-    x: 500,
-    y: 250,
-    label: "target",
-    treatment: "dynamic",
-    radius: 40
   });
 
   var gun = Physics.body("rectangle", {
@@ -72,6 +70,7 @@ require([
     offset: Physics.vector(50, 0)
   });
 
+  // TODO: remove wall in first level
   var wall = Physics.body("rectangle", {
     treatment: "static",
     x: 350,
@@ -105,16 +104,25 @@ require([
   });
 
   var driving = Physics.behavior("driving").applyTo([car]);
-  var explode = Physics.behavior("explode").applyTo([target]);
+  var explode = Physics.behavior("explode").applyTo([targets]);
 
-  var objects = [car, wall, target, laser];
-  // Physics.behavior("edge-collision-detection").applyTo(objects);
+  setInterval(function() {
+    // targets = getTargets(3);
+    world.add(targets);
+  }, 4000);
+
+  world.collisionDetection = Physics.behavior("body-collision-detection");
+  // physics are applied to all objects
+  var objects = [car, wall, laser];
+  objects = objects.concat(targets);
+
+  world.add(objects);
 
   world.add([
-    renderer, car, wall, driving, gun, laser, target, explode,
-    Physics.behavior("sweep-prune").applyTo(objects),
-    Physics.behavior("body-collision-detection").applyTo(objects),
-    Physics.behavior("body-impulse-response").applyTo(objects),
+    renderer, driving, gun, explode,
+    Physics.behavior("sweep-prune"),
+    world.collisionDetection.applyTo(objects),
+    Physics.behavior("body-impulse-response"),
     Physics.behavior("edge-collision-detection", {
       aabb: bounds
     })
