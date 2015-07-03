@@ -24,8 +24,8 @@ define(["physicsjs", "physicsjs/bodies/rectangle"], function(Physics) {
     return {
       init: function(options) {
         gun = options.gun;
-        laser = options.laser;
-        
+        // laser = options.laser;
+
         // make the gun rotate
         gun.state.angular.vel = 0.005;
         parent.init.call(this, options);
@@ -45,12 +45,24 @@ define(["physicsjs", "physicsjs/bodies/rectangle"], function(Physics) {
         var cos = Math.cos(gun.state.angular.pos);
         var sin = Math.sin(gun.state.angular.pos);
         var r = 150;
-        laser.hidden = false;
-        laser.state.pos = Physics.vector(
-          this.state.pos.get(0) + r * cos, 
-          this.state.pos.get(1) + r * sin
-        );
-        laser.state.vel = Physics.vector(0.4 * cos, 0.4 * sin);
+        var laser = Physics.body("circle", {
+          radius: 5,
+          treatment: "dynamic",
+          label: "laser",
+          x: this.state.pos.get(0) + r * cos,
+          y: this.state.pos.get(1) + r * sin,
+          vx: (0.8 * cos),
+          vy: (0.8 * sin)
+        });
+
+        // add laser to world
+        world.addBodyAndCollisions(laser);
+
+        setTimeout(function() {
+          // remove collision when object is removed
+          world.removeBodyAndCollisions(laser);
+        }, 2000);
+
         return self;
       },
       mount: function(gun, laser) {

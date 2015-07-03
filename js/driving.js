@@ -82,21 +82,36 @@ define(["physicsjs"], function(Physics) {
       connect: function(world) {
 
         // query for collisions between laser and target
-        var query = Physics.query({
+        var crashQuery = Physics.query({
           $or: [
             {bodyA: {label: "car" }}, {bodyB: {label: "car"}}
           ]
         });
+
+        var killQuery = Physics.query({
+          $or: [
+            {bodyA: {label: "car"}, bodyB: {label: "enemy"}},
+            {bodyA: {label: "enemy"}, bodyB: {label: "car"}}
+          ]
+        });
         // called when a collision happens
         world.on("collisions:detected", function(data) {
-          var found = Physics.util.find(data.collisions, query);
+          var killed = Physics.util.find(data.collisions, killQuery);
+          var crash = Physics.util.find(data.collisions, crashQuery);
+
+          if(killed && killed.bodyA.label === "car") {
+            world.removeBodyAndCollisions(killed.bodyA);
+          }
+
+          if(killed && killed.bodyB.label === "car") {
+            world.removeBodyAndCollisions(killed.bodyB);
+          }
           // the target is removed
-          if(found && found.bodyA.label === "car") {
-            velocity = - velocity * 0.6;
-          }else if(found && found.bodyB.label === "car") {
-            console.log("car");
+          if(crash) {
             velocity = - velocity * 0.6;
           }
+
+
         }, this);
         world.on("integrate:positions", this.behave, this);
         return self;
