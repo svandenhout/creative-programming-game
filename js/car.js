@@ -61,7 +61,7 @@ define(["physicsjs", "physicsjs/bodies/rectangle"], function(Physics) {
         setTimeout(function() {
           // remove collision when object is removed
           world.removeBodyAndCollisions(laser);
-        }, 2000);
+        }, 1000);
 
         return self;
       },

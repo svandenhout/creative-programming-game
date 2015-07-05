@@ -80,7 +80,6 @@ define(["physicsjs"], function(Physics) {
         _car.turn(turn);
       },
       connect: function(world) {
-
         // query for collisions between laser and target
         var crashQuery = Physics.query({
           $or: [

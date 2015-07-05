@@ -1,8 +1,10 @@
 body {
-	position: relative;
 	background-color: black;
 }
 
 #canvas {
+	margin: auto 0;
 	background-color: grey;
+	display: block;
+	width: 1280px;
 }

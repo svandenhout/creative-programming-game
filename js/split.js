@@ -9,31 +9,53 @@ require.config({
 
 define(["physicsjs"], function(Physics) {
   "use strict";
-  Physics.behavior("explode", function(parent) {
+  Physics.behavior("split", function(parent) {
+    // amount of times an enemy splits
     var splits = 1;
-    var splitEnemy = function(world, enemy) {
-      if(splits < 1) return false;
-      splits -= 1;
+    // amount of enemies that spawn after split
+    var enemies = 2;
+    // total amount of kill the player needs to finish the level
+    var totalKills = 3;
 
-      for(var i = 0; i < 2; i++) {
-        var vx = (i < 1) ? -0.4 : 0.4;
-        var newEnemy = Physics.body("circle", {
+    var splitEnemy = function(world, enemy) {
+      totalKills -= 1;
+      if(splits < 1 && enemies < 1) {
+        return false;
+      }else if(splits < 1) {
+        world.removeBody(enemy);
+        return true;
+      }
+
+      var bodies = [];
+      for(var i = 0; i < enemies + 1; i++) {
+        var vx = (i < 1) ? 0.4 : -0.4;
+        bodies.push(Physics.body("circle", {
           radius: enemy.radius / 2,
           treatment: "dynamic",
           label: "enemy",
+          // the last enemy in the loop will not do
+          // collisions so i just hide it
+          hidden: (i < enemies) ? false : true,
           vx: vx,
           vy: 0.4,
           x: enemy.state.pos.get(0),
           y: enemy.state.pos.get(1)
-        });
-        world.addBodyAndCollisions(newEnemy);
+        }));
       }
+
+      splits -= 1;
+
+      world.addBodyAndCollisions(bodies);
       world.removeBodyAndCollisions(enemy);
-      return splits;
+
+      return true;
     };
 
     return {
       init: function(options) {
+        if(options.splits) splits = options.splits;
+        if(options.enemies) enemies = options.enemies;
+        totalKills = 1 + Math.pow(enemies, splits);
         var self = this;
         parent.init.call(this, options);
       },
@@ -41,7 +63,7 @@ define(["physicsjs"], function(Physics) {
 
       },
       connect: function(world) {
-        // query for collisions between laser and target
+        // query for collisions between laser and enemy
         var query = Physics.query({
           $or: [
             {bodyA: {label: "laser" }, bodyB: {label: "enemy"}},
@@ -53,12 +75,14 @@ define(["physicsjs"], function(Physics) {
           var found = Physics.util.find(data.collisions, query);
           // the target is removed
           if(found && found.bodyA.label === "enemy") {
-            console.log(splitEnemy(world, found.bodyA) > 0);
-            if(!splitEnemy(world, found.bodyA))
+            if(!splitEnemy(world, found.bodyA)) {
                 world.removeBodyAndCollisions(found.bodyA);
+            }
+            if(totalKills === 0) world.warp(0.2);
           }else if(found && found.bodyB.label === "enemy") {
-            if(!splitEnemy(world, found.bodyB))
+            if(!splitEnemy(world, found.bodyB)) {}
                 world.removeBodyAndCollisions(found.bodyB);
+            if(totalKills === 0) world.warp(0.2);
           }
         }, this);
         world.on("integrate:positions", this.behave, this);
