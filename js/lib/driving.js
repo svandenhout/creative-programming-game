@@ -7,11 +7,11 @@ require.config({
   }]
 });
 
-define(["physicsjs"], function(Physics) {
+define(["physicsjs", "js/lib/menu"], function(Physics, menu) {
 "use strict";
   Physics.behavior("driving", function(parent) {
 
-    var _car = {},
+    var target = {},
         drive = 0, // velocity
         turn = 0,
         accelerate = 0,
@@ -47,7 +47,7 @@ define(["physicsjs"], function(Physics) {
                   minTurnSpeed : velocity ;
             break;
             case 32:
-              _car.shoot();
+              target.shoot();
             break;
           }
           return false;
@@ -75,9 +75,9 @@ define(["physicsjs"], function(Physics) {
         if(accelerate === 0 && velocity < 0) velocity += deceleration;
         if(accelerate === 1 && velocity < 1) velocity += forwardsAcc;
         if(accelerate === -1 && velocity > -0.6) velocity -= backwardsAcc;
-        _car = this.getTargets()[0];
-        _car.drive(velocity);
-        _car.turn(turn);
+        target = this.getTargets()[0];
+        target.drive(velocity);
+        target.turn(turn);
       },
       connect: function(world) {
         // query for collisions between laser and target
@@ -93,19 +93,47 @@ define(["physicsjs"], function(Physics) {
             {bodyA: {label: "enemy"}, bodyB: {label: "car"}}
           ]
         });
+
+        var bulletKillQuery = Physics.query({
+          $or: [
+            {bodyA: {label: "car"}, bodyB: {label: "enemyLaser"}},
+            {bodyA: {label: "enemyLaser"}, bodyB: {label: "car"}}
+          ]
+        });
+
         // called when a collision happens
         world.on("collisions:detected", function(data) {
-          var killed = Physics.util.find(data.collisions, killQuery);
           var crash = Physics.util.find(data.collisions, crashQuery);
+          var killed = Physics.util.find(data.collisions, killQuery);
+          var bulletKilled =
+              Physics.util.find(data.collisions, bulletKillQuery);
 
+          // ways of getting yourself killed
           if(killed && killed.bodyA.label === "car") {
             world.removeBodyAndCollisions(killed.bodyA);
+            world.warp(0.2);
+            menu();
           }
 
-          if(killed && killed.bodyB.label === "car") {
+          if(killed && killed.bodyB.label === "car" ) {
             world.removeBodyAndCollisions(killed.bodyB);
+            world.warp(0.2);
+            menu();
           }
-          // the target is removed
+
+          if(bulletKilled && bulletKilled.bodyA.label === "car") {
+            world.removeBodyAndCollisions(bulletKilled.bodyA);
+            world.warp(0.2);
+            menu();
+          }
+
+          if(bulletKilled && bulletKilled.bodyB.label === "car") {
+            world.removeBodyAndCollisions(bulletKilled.bodyB);
+            world.warp(0.2);
+            menu();
+          }
+
+          // bounce from objects like sides & walls
           if(crash) {
             velocity = - velocity * 0.6;
           }

@@ -1,10 +1,20 @@
 <html>
 <head>
-  <title> BULLETHELL </title>
+	<title> BULLETHELL </title>
+	<link
+		href="http://fonts.googleapis.com/css?family=Bangers"
+		rel="stylesheet" type="text/css"
+	>
 	<link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-  <canvas id="canvas" width="1280" height="768"></canvas>
-  <script data-main="js/app.js" src="js/lib/require.js"></script>
+  <canvas id="canvas" class="bullethell" width="1280" height="768"></canvas>
+	<menu id="menu" style="display: none;">
+		<button class="interface" id="next" href="hell.html">
+			NEXT LEVEL
+		</button>
+		<button class="interface" id="retry"> RETRY </button>
+	</menu>
+	<script data-main="js/lvl2.js" src="js/lib/require.js"></script>
 </body>
 </html>

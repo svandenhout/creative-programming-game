@@ -16,15 +16,14 @@ define(["physicsjs", "physicsjs/bodies/rectangle"], function(Physics) {
         scratch = Physics.scratchpad(),
         v = scratch.vector(),
         angle = 0,
+        gunLoaded = true,
         gun, laser;
 
     carImg.src = require.toUrl("images/car.png");
-    // bulletImg.src = require.toUrl("images/bullet.png");
 
     return {
       init: function(options) {
         gun = options.gun;
-        // laser = options.laser;
 
         // make the gun rotate
         gun.state.angular.vel = 0.005;
@@ -42,8 +41,14 @@ define(["physicsjs", "physicsjs/bodies/rectangle"], function(Physics) {
           return self;
         }
 
+        // only shoot one bullet at a time for difficulty
+        if(!gunLoaded) return self;
+        gunLoaded = false;
+
+        // cos & sin shoot from the gun
         var cos = Math.cos(gun.state.angular.pos);
         var sin = Math.sin(gun.state.angular.pos);
+
         var r = 150;
         var laser = Physics.body("circle", {
           radius: 5,
@@ -52,13 +57,17 @@ define(["physicsjs", "physicsjs/bodies/rectangle"], function(Physics) {
           x: this.state.pos.get(0) + r * cos,
           y: this.state.pos.get(1) + r * sin,
           vx: (0.8 * cos),
-          vy: (0.8 * sin)
+          vy: (0.8 * sin),
+          styles: {
+            fillStyle: "#FF00FF"
+          }
         });
 
         // add laser to world
         world.addBodyAndCollisions(laser);
 
         setTimeout(function() {
+          gunLoaded = true;
           // remove collision when object is removed
           world.removeBodyAndCollisions(laser);
         }, 1000);

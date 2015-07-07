@@ -1,10 +1,45 @@
 body {
+	position: relative;
 	background-color: black;
 }
 
 #canvas {
-	margin: auto 0;
-	background-color: grey;
+	top: 50px;
+  position: relative !important;
+  margin: 0 auto;
+	background-color: #00FF00;
 	display: block;
-	width: 1280px;
+}
+
+#canvas.bullethell {
+	background-color: #FFFF00 !important;
+}
+
+#canvas.hell {
+	background-color: #6666FF !important;
+}
+
+.interface {
+	font-family: Bangers;
+	font-size: 70;
+	border: solid 2px white;
+	background-color: #FF3300;
+	color: white;
+	border-radius: 10px;
+	padding: 0 40px;
+	margin-bottom: 30px;
+	cursor: pointer;
+	display: block;
+}
+
+.interface:hover {
+	color: grey;
+	border-color: grey;
+}
+
+menu {
+	position: absolute;
+	z-index: 2;
+	top: 200px;
+	left: 400px;
 }

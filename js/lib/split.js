@@ -7,9 +7,16 @@ require.config({
   }]
 });
 
-define(["physicsjs"], function(Physics) {
+/*
+ * split defines the behavior of an anemy, once hit the enemy will split up
+ * into multiple enemies.
+ * once the enemy is defeated the level ends
+ */
+
+define(["physicsjs", "js/lib/menu"], function(Physics, menu) {
   "use strict";
   Physics.behavior("split", function(parent) {
+    var target;
     // amount of times an enemy splits
     var splits = 1;
     // amount of enemies that spawn after split
@@ -28,7 +35,8 @@ define(["physicsjs"], function(Physics) {
 
       var bodies = [];
       for(var i = 0; i < enemies + 1; i++) {
-        var vx = (i < 1) ? 0.4 : -0.4;
+        var vx = (i % 2 === 0) ? 0.4 : -0.4;
+        var vy = (splits % 2 === 0) ? 0.4 : -0.4;
         bodies.push(Physics.body("circle", {
           radius: enemy.radius / 2,
           treatment: "dynamic",
@@ -37,9 +45,10 @@ define(["physicsjs"], function(Physics) {
           // collisions so i just hide it
           hidden: (i < enemies) ? false : true,
           vx: vx,
-          vy: 0.4,
+          vy: vy,
           x: enemy.state.pos.get(0),
-          y: enemy.state.pos.get(1)
+          y: enemy.state.pos.get(1),
+          styles: world.enemyStyles
         }));
       }
 
@@ -60,7 +69,7 @@ define(["physicsjs"], function(Physics) {
         parent.init.call(this, options);
       },
       behave: function() {
-
+        target = this.getTargets()[0];
       },
       connect: function(world) {
         // query for collisions between laser and enemy
@@ -74,15 +83,21 @@ define(["physicsjs"], function(Physics) {
         world.on("collisions:detected", function(data) {
           var found = Physics.util.find(data.collisions, query);
           // the target is removed
-          if(found && found.bodyA.label === "enemy") {
+          if(found && found.bodyA.uid === target.uid) {
             if(!splitEnemy(world, found.bodyA)) {
                 world.removeBodyAndCollisions(found.bodyA);
             }
-            if(totalKills === 0) world.warp(0.2);
-          }else if(found && found.bodyB.label === "enemy") {
+            if(totalKills === 0) {
+              world.warp(0.2);
+              menu();
+            }
+          }else if(found && found.bodyB.uid === target.uid) {
             if(!splitEnemy(world, found.bodyB)) {}
                 world.removeBodyAndCollisions(found.bodyB);
-            if(totalKills === 0) world.warp(0.2);
+            if(totalKills === 0) {
+              world.warp(0.2);
+              menu();
+            }
           }
         }, this);
         world.on("integrate:positions", this.behave, this);
