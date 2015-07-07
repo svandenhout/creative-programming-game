@@ -71,14 +71,19 @@ define(["physicsjs"], function(Physics) {
         // called when a collision happens
         world.on("collisions:detected", function(data) {
           var found = Physics.util.find(data.collisions, query);
-          // console.log(found.bodyA);
           // the target is removed
           if(found && found.bodyA.uid === target.uid) {
-            if(!rainBullets(world, found.bodyA))
-              world.removeBodyAndCollisions(found.bodyB);
+            if(!rainBullets(world, found.bodyA)) {
+              world.removeBodyAndCollisions(found.bodyA);
+              world.warp(0.2);
+              menu();
+            }
           }else if(found && found.bodyB.uid === target.uid) {
-            if(!rainBullets(world, found.bodyB))
+            if(!rainBullets(world, found.bodyB)) {
               world.removeBodyAndCollisions(found.bodyB);
+              world.warp(0.2);
+              menu();
+            }
           }
         }, this);
         world.on("integrate:positions", this.behave, this);
