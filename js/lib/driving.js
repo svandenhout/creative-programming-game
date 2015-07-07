@@ -111,24 +111,28 @@ define(["physicsjs", "js/lib/menu"], function(Physics, menu) {
           // ways of getting yourself killed
           if(killed && killed.bodyA.label === "car") {
             world.removeBodyAndCollisions(killed.bodyA);
+            world.audio.explosion.play();
             world.warp(0.2);
             menu();
           }
 
           if(killed && killed.bodyB.label === "car" ) {
             world.removeBodyAndCollisions(killed.bodyB);
+            world.audio.explosion.play();
             world.warp(0.2);
             menu();
           }
 
           if(bulletKilled && bulletKilled.bodyA.label === "car") {
             world.removeBodyAndCollisions(bulletKilled.bodyA);
+            world.audio.explosion.play();
             world.warp(0.2);
             menu();
           }
 
           if(bulletKilled && bulletKilled.bodyB.label === "car") {
             world.removeBodyAndCollisions(bulletKilled.bodyB);
+            world.audio.explosion.play();
             world.warp(0.2);
             menu();
           }

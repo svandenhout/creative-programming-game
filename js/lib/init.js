@@ -58,6 +58,12 @@ define([
     this.add(body);
   };
 
+  // add laser sound to the world
+  world.audio = {};
+  world.audio.laser = new Audio(require.toUrl("audio/laser.wav"));
+  world.audio.explosion = new Audio(require.toUrl("audio/explosion.wav"));
+  world.audio.splat = new Audio(require.toUrl("audio/splat.wav"));
+
   var bounds = Physics.aabb(0, 0, 1280, 768);
   world.collisionDetection = Physics.behavior("body-collision-detection");
 

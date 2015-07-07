@@ -64,6 +64,7 @@ define(["physicsjs", "physicsjs/bodies/rectangle"], function(Physics) {
         });
 
         // add laser to world
+        world.audio.laser.play();
         world.addBodyAndCollisions(laser);
 
         setTimeout(function() {

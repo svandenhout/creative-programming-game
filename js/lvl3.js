@@ -34,9 +34,27 @@ require([
     radius: 100,
     treatment: "dynamic",
     label: "enemy",
+    x: 350,
+    y: 250,
+    vx: 0.3,
+    vy: 0.3,
+    styles: world.enemyStyles
+  });
+
+  var enemy2 = Physics.body("circle", {
+    radius: 100,
+    treatment: "dynamic",
+    label: "enemy",
     x: 590,
     y: 250,
-    styles: world.enemyStyles
+    vx: 0.5,
+    vy: -0.4,
+    styles: {
+      strokeStyle: "#2E000F",
+      lineWidth: 10,
+      fillStyle: "#990033",
+      angleIndicator: "#990033"
+    }
   });
 
   var gunImg = new Image();
@@ -63,16 +81,31 @@ require([
     gun: gun
   });
 
+  var wall = Physics.body("rectangle", {
+    treatment: "static",
+    x: 590,
+    y: 400,
+    width: 50,
+    height: 500,
+    styles: {
+      fillStyle: "black"
+    }
+  });
+
   var driving = Physics.behavior("driving").applyTo([car]);
   var split = Physics.behavior("split", {
     splits: 2, enemies: 2
   }).applyTo([enemy]);
+  var bullethell = Physics.behavior("bullethell", {
+    bullets: 15,
+    health: 3
+  }).applyTo([enemy2]);
 
-  world.collidingBodies = [car, enemy];
+  world.collidingBodies = [car, enemy, enemy2, wall];
 
   // physics are applied to all objects
   world.add([
-    driving, split, car, gun, enemy,
+    driving, bullethell, car, split, gun, enemy, enemy2, wall,
     world.collisionDetection.applyTo(world.collidingBodies),
   ]);
 

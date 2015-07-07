@@ -16,7 +16,8 @@ require.config({
 define(["physicsjs", "js/lib/menu"], function(Physics, menu) {
   "use strict";
   Physics.behavior("split", function(parent) {
-    var target;
+    var self;
+    var targets;
     // amount of times an enemy splits
     var splits = 1;
     // amount of enemies that spawn after split
@@ -33,10 +34,13 @@ define(["physicsjs", "js/lib/menu"], function(Physics, menu) {
         return true;
       }
 
+      world.audio.splat.play();
+
       var bodies = [];
       for(var i = 0; i < enemies + 1; i++) {
         var vx = (i % 2 === 0) ? 0.4 : -0.4;
         var vy = (splits % 2 === 0) ? 0.4 : -0.4;
+        console.log(enemy);
         bodies.push(Physics.body("circle", {
           radius: enemy.radius / 2,
           treatment: "dynamic",
@@ -51,12 +55,13 @@ define(["physicsjs", "js/lib/menu"], function(Physics, menu) {
           styles: world.enemyStyles
         }));
       }
+      world.removeBodyAndCollisions(enemy);
 
       splits -= 1;
 
       world.addBodyAndCollisions(bodies);
-      world.removeBodyAndCollisions(enemy);
 
+      targets = bodies;
       return true;
     };
 
@@ -65,13 +70,15 @@ define(["physicsjs", "js/lib/menu"], function(Physics, menu) {
         if(options.splits) splits = options.splits;
         if(options.enemies) enemies = options.enemies;
         totalKills = 1 + Math.pow(enemies, splits);
-        var self = this;
+        self = this;
         parent.init.call(this, options);
       },
       behave: function() {
-        target = this.getTargets()[0];
+
       },
       connect: function(world) {
+        targets = [this.getTargets()[0]];
+
         // query for collisions between laser and enemy
         var query = Physics.query({
           $or: [
@@ -82,21 +89,23 @@ define(["physicsjs", "js/lib/menu"], function(Physics, menu) {
         // called when a collision happens
         world.on("collisions:detected", function(data) {
           var found = Physics.util.find(data.collisions, query);
-          // the target is removed
-          if(found && found.bodyA.uid === target.uid) {
-            if(!splitEnemy(world, found.bodyA)) {
-                world.removeBodyAndCollisions(found.bodyA);
-            }
-            if(totalKills === 0) {
-              world.warp(0.2);
-              menu();
-            }
-          }else if(found && found.bodyB.uid === target.uid) {
-            if(!splitEnemy(world, found.bodyB)) {}
-                world.removeBodyAndCollisions(found.bodyB);
-            if(totalKills === 0) {
-              world.warp(0.2);
-              menu();
+          // check multiple targets when split
+          for(var i = 0; i < targets.length; i++) {
+            // the target is removed
+            if(found && targets[i].uid === found.bodyA.uid) {
+              if(!splitEnemy(world, found.bodyA))
+                  world.removeBodyAndCollisions(found.bodyA);
+              if(totalKills === 0) {
+                world.warp(0.2);
+                menu();
+              }
+            }else if(found && targets[i].uid === found.bodyB.uid) {
+              if(!splitEnemy(world, found.bodyB))
+                  world.removeBodyAndCollisions(found.bodyB);
+              if(totalKills === 0) {
+                world.warp(0.2);
+                menu();
+              }
             }
           }
         }, this);

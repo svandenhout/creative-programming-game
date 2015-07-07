@@ -17,6 +17,7 @@ define(["physicsjs"], function(Physics) {
     var health = 3;
 
     var rainBullets = function(world, enemy) {
+      world.audio.splat.play();
       if(health < 1) return false;
       health -= 1;
       for(var i = 0; i < bullets; i++) {
